@@ -1,6 +1,10 @@
-# CommonLibSSE Plugin Template
+# Chaotic Clock
 
-This is a basic plugin template using CommonLibSSE.
+This is a showcase of the API functionality of my Ingame Clock mod.
+It positions the Clock randomly and changes color and scale of the clock randomly as well. 
+Just for fun and mainly to show how to work with the API
+
+## Building the Mod:
 
 ### Requirements
 * [XMake](https://xmake.io) [2.8.2+]
@@ -8,13 +12,12 @@ This is a basic plugin template using CommonLibSSE.
 
 ## Getting Started
 ```bat
-git clone https://github.com/Styyx1/commonlibsse-template --recursive
-cd commonlibsse-template
+git clone https://github.com/Styyx1/ChaoticClock --recursive
+cd ChaoticClock
 ```
 
 ### Build
-To build the project you first need to run the ``projectSetup.py`` and enter the data it asks for.   
-Then run the following command:
+To build the project you first need to run the following command:
 ```bat
 xmake build
 ```
@@ -42,6 +45,3 @@ If you want to upgrade the project's dependencies, run the following commands:
 xmake repo --update
 xmake require --upgrade
 ```
-
-## Documentation
-Please refer to the [Wiki](../../wiki/Home) for more advanced topics.
