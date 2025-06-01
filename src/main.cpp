@@ -93,11 +93,6 @@ struct ChaosClock : public REX::Singleton<ChaosClock>
 	float lastX{ 500.0f };
 	float lastY{ 500.0f };
 
-	std::mt19937 rng{ std::random_device{}() };
-	std::uniform_real_distribution<float> posDistX{ 0.0f, 1600.0f };
-	std::uniform_real_distribution<float> posDistY{ 0.0f, 900.0f };
-	std::uniform_int_distribution<int> colorDist{ 0, 255 };
-
 	// These two will be called by your own mod's FrameUpdate hook
 	void RunChaosMode()
 	{
