@@ -4,6 +4,7 @@ static const char* plugin_name = "ChaosClock";
 typedef IngameClockAPI* (*_RequestIngameClockAPI)();
 
 IngameClockAPI* g_clockAPI = nullptr;
+
 void RegisterClockAPI()
 {
 	auto handle = REX::W32::GetModuleHandleW(L"ingame-clock.dll");
@@ -34,8 +35,8 @@ struct Randomiser {
 	static std::string GetRandomColorCode() {
 		std::uniform_int_distribution<int> distrib(0x000000, 0xFFFFFF);
 		std::stringstream ss;
-		ss << std::uppercase << std::setfill('0') << std::setw(6)
-			<< std::hex << distrib(GetRNG());
+		ss << '#' << std::uppercase << std::setfill('0') << std::setw(6)
+			<< std::hex << distrib(GetRNG()) << "EE";
 		return ss.str();
 	}
 
@@ -89,11 +90,9 @@ struct ChaosClock : public REX::Singleton<ChaosClock>
 {
 	Timer timerColorPos;
 	Timer timerToggle;
-
 	float lastX{ 500.0f };
 	float lastY{ 500.0f };
 
-	// These two will be called by your own mod's FrameUpdate hook
 	void RunChaosMode()
 	{
 		if (!timerColorPos.IsRunning())
@@ -105,11 +104,13 @@ struct ChaosClock : public REX::Singleton<ChaosClock>
 		}
 	}
 
-	// Internal randomisation logic for ChaosMode
 	void RandomisePositionAndColor()
 	{
 		float newX = lastX;
 		float newY = lastY;
+		
+        const std::string colorStr = Randomiser::GetRandomColorCode();
+		float new_scale = Randomiser::GetRandomFloat(1.0f, 4.0f);
 
 		while (std::abs(newX - lastX) < 200.0f)
 			newX = Randomiser::GetRandomFloat(0.0f, 1600.0f);
@@ -118,12 +119,11 @@ struct ChaosClock : public REX::Singleton<ChaosClock>
 
 		lastX = newX;
 		lastY = newY;
-        const std::string colorStr = Randomiser::GetRandomColorCode();
-		float new_scale = Randomiser::GetRandomFloat(1.0f, 4.0f);
+
         if (g_clockAPI) {
-			g_clockAPI->SetClockScale(new_scale, true);
-           g_clockAPI->SetClockColor(colorStr.c_str(), true);
-           g_clockAPI->SetClockPosition(newX, newY, true);		   
+			g_clockAPI->SetClockScale(new_scale, false);
+			g_clockAPI->SetClockColor(colorStr.c_str(), false);
+			g_clockAPI->SetClockPosition(newX, newY, false);		   
         }		
 	}
 };
@@ -131,20 +131,23 @@ struct ChaosClock : public REX::Singleton<ChaosClock>
 static bool was_disabled{false};
 
 namespace OnFrameHook {
-
 	
-	static int32_t OnFrameUpdate(float a_delta) 
-	{
-		
-		if (!was_disabled && g_clockAPI) {
+	class Update : public REX::Singleton<Update> {
+	private:
+		static int32_t OnFrameUpdate(float a_delta) 
+		{		
+			/*if (!was_disabled && g_clockAPI) {
 			g_clockAPI->SetControlDisabler(plugin_name, true);
 			was_disabled = true;
-		}			
+			REX::INFO("controls disabled");
+			}	*/		
 
-		ChaosClock::GetSingleton()->RunChaosMode();
-		return int32_t(a_delta);
-	};
-	inline static REL::Hook func{ REL::ID(36564), 0xc26, OnFrameUpdate };
+			ChaosClock::GetSingleton()->RunChaosMode();
+			return func(a_delta);
+
+		};
+		static inline REL::Hook func{ REL::ID(36564), 0xc26, OnFrameUpdate };
+	};	
 }
 
 void InitListener(SKSE::MessagingInterface::Message* a_message) {
